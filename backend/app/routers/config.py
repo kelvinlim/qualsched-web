@@ -95,42 +95,7 @@ def forget_copies(
     return svc.forget_survey_copies(db, user, account_id, project_id)
 
 
-# --- Qualtrics list/send not wired in milestone 1 (PHI stays in Qualtrics) ----------
-
-
-@router.get("/accounts/{account_id}/projects/{project_id}/contacts")
-def get_contacts(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Contacts")
-
-
-@router.post("/accounts/{account_id}/projects/{project_id}/contacts")
-def create_contact(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Contacts")
-
-
-@router.put("/accounts/{account_id}/projects/{project_id}/contacts/{contact_id}")
-def update_contact(
-    account_id: str,
-    project_id: str,
-    contact_id: str,
-    user: User = Depends(get_current_user),
-):
-    raise not_implemented("Contacts")
-
-
-@router.delete("/accounts/{account_id}/projects/{project_id}/contacts/{contact_id}")
-def delete_contact(
-    account_id: str,
-    project_id: str,
-    contact_id: str,
-    user: User = Depends(get_current_user),
-):
-    raise not_implemented("Contacts")
-
-
-@router.post("/accounts/{account_id}/projects/{project_id}/contacts/defaults")
-def apply_defaults(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Contacts")
+# --- Schedule / Distributions stay unwired (milestone 2) ----------
 
 
 @router.post("/accounts/{account_id}/projects/{project_id}/schedule/preview")

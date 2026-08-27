@@ -89,6 +89,15 @@ class QualtricsClient:
     def get_absolute(self, url: str) -> dict[str, Any]:
         return self._send(self._client.build_request("GET", url))
 
+    def post(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+        return self._send(self._client.build_request("POST", self.url(path), json=body))
+
+    def put(self, path: str, body: dict[str, Any]) -> dict[str, Any]:
+        return self._send(self._client.build_request("PUT", self.url(path), json=body))
+
+    def delete(self, path: str) -> dict[str, Any]:
+        return self._send(self._client.build_request("DELETE", self.url(path)))
+
     def get_elements(self, path: str) -> list[dict[str, Any]]:
         out: list[dict[str, Any]] = []
         body = self.get(path)

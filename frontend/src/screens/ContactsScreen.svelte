@@ -272,11 +272,6 @@
   Participants in this profile's mailing list, with the embedded data that decides when
   they get invitations.
 </p>
-<div class="banner warn">
-  Not wired yet (milestone 1). The mailing list will be read from Qualtrics and never
-  stored in this app.
-</div>
-
 {#if error}<div class="banner error">{error}</div>{/if}
 {#if notice}<div class="banner ok">{notice}</div>{/if}
 
@@ -322,7 +317,7 @@
 {#if sorted.length === 0 && !loading}
   <div class="empty">
     {contacts.length === 0
-      ? "No participants in this mailing list, or the list ID is not set on the profile."
+      ? "No participants in this mailing list."
       : "No participants match this search."}
   </div>
 {:else}

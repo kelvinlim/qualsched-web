@@ -111,14 +111,6 @@ def test_save_and_delete_profile(ctx):
     assert gone.json()["accounts"][0]["projects"] == []
 
 
-def test_contacts_not_wired(ctx):
-    client, _, _ = ctx
-    client.post("/api/accounts", json=ACCOUNT)
-    r = client.get(f"/api/accounts/{ACCOUNT['id']}/projects/{PROJECT['id']}/contacts")
-    assert r.status_code == 501
-    assert "Qualtrics" in r.json()["detail"]["message"]
-
-
 def test_empty_token_rejected(ctx):
     client, _, _ = ctx
     client.post("/api/accounts", json=ACCOUNT)

@@ -113,3 +113,35 @@ class UpdateInfo(BaseModel):
     updateAvailable: bool
     releaseNotes: str = ""
     releaseUrl: str = ""
+
+
+class ContactView(BaseModel):
+    contactId: str
+    firstName: str = ""
+    lastName: str = ""
+    email: str = ""
+    phone: str = ""
+    extRef: str = ""
+    embedded: dict[str, str] = Field(default_factory=dict)
+    eligible: bool
+    skipReason: str | None = None
+    method: str | None = None
+
+
+class ContactCreateIn(BaseModel):
+    core: dict[str, str] = Field(default_factory=dict)
+    embedded: dict[str, str] = Field(default_factory=dict)
+
+
+class ContactUpdateIn(BaseModel):
+    core: dict[str, str] = Field(default_factory=dict)
+    fields: dict[str, str] = Field(default_factory=dict)
+
+
+class ContactDefaultsIn(BaseModel):
+    contactIds: list[str] = Field(default_factory=list)
+
+
+class RemovedContact(BaseModel):
+    contactName: str
+    cancelled: int = 0

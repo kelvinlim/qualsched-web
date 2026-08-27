@@ -123,7 +123,7 @@ export const listMessages = (accountId: string) =>
 export const getMessageText = (accountId: string, messageId: string) =>
   request<string>(`/api/accounts/${accountId}/messages/${encodeURIComponent(messageId)}/text`);
 
-// --- contacts (Qualtrics-proxied later; 501 in milestone 1) ---------------
+// --- contacts (live Qualtrics mailing list; never stored) ---------------
 
 export const getContacts = (accountId: string, projectId: string) =>
   request<ContactView[]>(`/api/accounts/${accountId}/projects/${projectId}/contacts`);
