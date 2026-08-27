@@ -9,11 +9,16 @@ All notable changes to QualSched Web are documented in this file.
   missing embedded defaults). Participant PHI is proxied live and never stored.
 - Missing directory ID, mailing list ID, or API token returns HTTP 400 with a clear
   reason instead of an empty list that looks like "no participants."
+- Schedule preview and execute: compute a NumDays × TimeSlots plan in each contact's
+  timezone and book one Qualtrics distribution per participant × day × slot. The plan
+  is not stored. Missing token, data center, directory, mailing list, survey id, or
+  message id returns HTTP 400 rather than an empty plan.
 
 ### Notes
 - Deleting a contact still removes them from the Qualtrics mailing list. Cancelling
-  their unsent invitations is not wired yet (Schedule / Distributions stay 501), so
+  their unsent invitations is not wired yet (Distributions list/delete stay 501), so
   the response reports `cancelled=0`.
+- Schedule progress SSE is still a no-op. Distributions list/cancel is next.
 
 ## [0.0.1] - 2026-08-27
 

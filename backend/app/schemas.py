@@ -3,7 +3,10 @@
 Never include Qualtrics API tokens or token_ciphertext here.
 """
 
-from pydantic import BaseModel, ConfigDict, Field
+from datetime import datetime, timezone
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 
 class EmailHeader(BaseModel):
@@ -145,3 +148,57 @@ class ContactDefaultsIn(BaseModel):
 class RemovedContact(BaseModel):
     contactName: str
     cancelled: int = 0
+
+
+class PlanItem(BaseModel):
+    contactId: str
+    contactName: str
+    destination: str
+    method: Literal["sms", "email"]
+    dayIndex: int
+    slotLabel: str
+    surveyId: str
+    surveyLabel: str
+    sendLocal: str
+    sendUtc: datetime
+    expireUtc: datetime
+
+    @field_validator("sendUtc", "expireUtc", mode="before")
+    @classmethod
+    def parse_utc(cls, value: object) -> object:
+        if isinstance(value, str):
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return value
+
+    @field_serializer("sendUtc", "expireUtc")
+    def serialize_utc(self, value: datetime) -> str:
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+class Skipped(BaseModel):
+    contactId: str
+    contactName: str
+    reason: str
+
+
+class SchedulePreview(BaseModel):
+    items: list[PlanItem] = Field(default_factory=list)
+    skippedContacts: list[Skipped] = Field(default_factory=list)
+    skippedSlots: list[Skipped] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class ItemFailure(BaseModel):
+    contactName: str
+    destination: str
+    sendLocal: str
+    error: str
+    retryable: bool = False
+
+
+class SendReport(BaseModel):
+    scheduled: int
+    failed: list[ItemFailure] = Field(default_factory=list)
+    bookkeepingFailures: list[ItemFailure] = Field(default_factory=list)

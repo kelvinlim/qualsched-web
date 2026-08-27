@@ -7,6 +7,8 @@ All notable changes to QualSched Web are documented in this file.
 ### Changed
 - Contacts no longer shows the milestone-1 "not wired" banner. The page lists
   participants from the Qualtrics mailing list and can add, edit, and remove them.
+- Schedule no longer shows the milestone-1 "not wired" banner. Compute plan and
+  Send book Qualtrics invitations; the plan is not kept in this app.
 
 ## [0.0.1] - 2026-08-27
 

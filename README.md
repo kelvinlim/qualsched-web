@@ -20,8 +20,8 @@ Allowed tables:
 | `survey_profiles` | Survey id, mailing list id, template ids, sender, default settings |
 
 There is no `contacts` table. No participant phone/email/name columns. Contact
-list/create/update/delete routes proxy Qualtrics and discard the payload after the
-response. Schedule / send stay unwired.
+list/create/update/delete and schedule preview/execute proxy Qualtrics and discard
+the payload after the response. The plan is never stored.
 
 The Qualtrics API token is encrypted at rest. The browser **never** receives it. The
 frontend calls `/api/...`; the backend uses httpx against `{dc}.qualtrics.com`.
@@ -41,7 +41,8 @@ Distributions, Import, Export, Guide.
 
 **Milestone 1** wires Accounts (save data center + token) and survey-profile CRUD.
 Contacts now proxies the Qualtrics mailing list (no local participant table).
-Schedule / Distributions are present and honest about not being wired yet.
+Schedule computes a plan and books Qualtrics distributions; the plan is not stored.
+Distributions list/cancel is not wired yet.
 
 ## How to run (Docker Compose)
 
