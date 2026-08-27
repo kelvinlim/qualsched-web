@@ -137,3 +137,13 @@ Then open https://lnpitask.umn.edu/qualsched/
 
 `docker-compose.yml` is local-only (sidecar MariaDB `db` on host 3307). It is not
 used on lnpitask. Production reads `.env` (cnc3) via the Quadlet `EnvironmentFile`.
+
+## SPA prefix (follow-up, not this PR)
+
+Host nginx strips `/qualsched/` so the frontend container sees `/` — that matches
+today's Vite `base: /` and `scripts/deploy.sh` curling `http://localhost:8040/`.
+wearable-hub's SPA is built with `base: /wearable/` so the *browser* keeps
+assets and API calls under the prefix. If `https://lnpitask.umn.edu/qualsched/`
+loads HTML but `/assets/…` or `/api/…` 404 at the site root, set Vite
+`base: '/qualsched/'` and prefix frontend `fetch` paths the same way. Do not
+change the host nginx strip.
