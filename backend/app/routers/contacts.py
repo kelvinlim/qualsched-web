@@ -9,7 +9,13 @@ from app.db import get_db
 from app.errors import app_error
 from app.models import QualtricsAccount, SurveyProfile, User
 from app.qualtrics import QualtricsError
-from app.schemas import ContactCreateIn, ContactDefaultsIn, ContactUpdateIn, ContactView, RemovedContact
+from app.schemas import (
+    ContactCreateIn,
+    ContactDefaultsIn,
+    ContactUpdateIn,
+    ContactView,
+    RemovedContact,
+)
 from app.security import get_current_user
 
 router = APIRouter(

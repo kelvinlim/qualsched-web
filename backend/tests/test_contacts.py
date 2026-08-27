@@ -4,7 +4,6 @@ import json
 
 from app.contacts import WRITE_PACING_SECONDS, append_log_data
 from app.qualtrics import QualtricsError
-
 from tests.test_accounts import ACCOUNT, PROJECT, SECRET
 
 AID = ACCOUNT["id"]
