@@ -126,16 +126,17 @@ def local_to_utc(tz: ZoneInfo, day: date, minutes: int) -> datetime | None:
 
 
 def _from_local(tz: ZoneInfo, naive: datetime) -> datetime | None:
-    earlier = naive.replace(tzinfo=tz, fold=0)
-    later = naive.replace(tzinfo=tz, fold=1)
-    if earlier.utcoffset() != later.utcoffset():
-        return earlier
-    # Imaginary time (spring-forward gap): zoneinfo still constructs a datetime,
-    # but converting to UTC and back does not land on the same wall clock.
-    roundtrip = earlier.astimezone(timezone.utc).astimezone(tz).replace(tzinfo=None)
-    if roundtrip != naive:
-        return None
-    return earlier
+    # zoneinfo will construct a datetime for a spring-forward gap; the two folds
+    # even have different offsets, which looks like fall-back ambiguity. A UTC
+    # round-trip is what distinguishes them:
+    #   fall-back 01:30 — fold=0 (earlier) survives the round-trip
+    #   spring-forward 02:30 — neither fold comes back as 02:30
+    for fold in (0, 1):
+        candidate = naive.replace(tzinfo=tz, fold=fold)
+        back = candidate.astimezone(timezone.utc).astimezone(tz).replace(tzinfo=None)
+        if back == naive:
+            return candidate
+    return None
 
 
 def build_contact_plan(

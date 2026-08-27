@@ -311,9 +311,11 @@ def test_execute_partial_failure_and_bookkeeping(ctx, monkeypatch):
 
     plan = http.post(PREVIEW).json()
     original_post = fake.post
+    failed_once = {"n": 0}
 
     def flaky_post(path: str, body: dict):
-        if path == "distributions/sms" and len(fake.distributions) == 0:
+        if path == "distributions/sms" and failed_once["n"] == 0:
+            failed_once["n"] = 1
             fake.calls.append(("post", path, body))
             raise QualtricsError(429, "RateLimited", "slow down", retryable=True)
         return original_post(path, body)
