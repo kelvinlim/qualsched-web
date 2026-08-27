@@ -19,8 +19,9 @@ Allowed tables:
 | `qualtrics_accounts` | Data center, directory id, library id, **Fernet-encrypted** API token |
 | `survey_profiles` | Survey id, mailing list id, template ids, sender, default settings |
 
-There is no `contacts` table. No participant phone/email/name columns. When contact
-list/send is wired later, those routes will proxy Qualtrics and discard the payload.
+There is no `contacts` table. No participant phone/email/name columns. Contact
+list/create/update/delete routes proxy Qualtrics and discard the payload after the
+response. Schedule / send stay unwired.
 
 The Qualtrics API token is encrypted at rest. The browser **never** receives it. The
 frontend calls `/api/...`; the backend uses httpx against `{dc}.qualtrics.com`.
@@ -39,7 +40,8 @@ The sidebar and screens are the same: Accounts, Survey profile, Contacts, Schedu
 Distributions, Import, Export, Guide.
 
 **Milestone 1** wires Accounts (save data center + token) and survey-profile CRUD.
-Contacts / Schedule / Distributions are present and honest about not being wired yet.
+Contacts now proxies the Qualtrics mailing list (no local participant table).
+Schedule / Distributions are present and honest about not being wired yet.
 
 ## How to run (Docker Compose)
 

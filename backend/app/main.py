@@ -6,7 +6,7 @@ from sqlalchemy import text
 
 from app.config import get_settings
 from app.db import engine
-from app.routers import auth, config, importexport, lookups
+from app.routers import auth, config, contacts, importexport, lookups
 
 settings = get_settings()
 
@@ -26,6 +26,7 @@ if settings.environment == "dev":
 
 app.include_router(auth.router)
 app.include_router(config.router)
+app.include_router(contacts.router)
 app.include_router(lookups.router)
 app.include_router(importexport.router)
 

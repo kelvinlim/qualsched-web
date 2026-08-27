@@ -2,6 +2,19 @@
 
 All notable changes to QualSched Web are documented in this file.
 
+## [Unreleased]
+
+### Added
+- Contacts screen talks to the Qualtrics mailing list (list, add, edit, remove, fill
+  missing embedded defaults). Participant PHI is proxied live and never stored.
+- Missing directory ID, mailing list ID, or API token returns HTTP 400 with a clear
+  reason instead of an empty list that looks like "no participants."
+
+### Notes
+- Deleting a contact still removes them from the Qualtrics mailing list. Cancelling
+  their unsent invitations is not wired yet (Schedule / Distributions stay 501), so
+  the response reports `cancelled=0`.
+
 ## [0.0.1] - 2026-08-27
 
 ### Added
@@ -9,7 +22,7 @@ All notable changes to QualSched Web are documented in this file.
   patterned on wearable-hub ops (Fernet, Google allowlist, MariaDB).
 - Accounts screen stores Qualtrics data-center metadata and a Fernet-encrypted API
   token. The browser never receives the token.
-- Survey profile CRUD. Qualtrics list/send (contacts, schedule, distributions) is
-  not wired yet; those screens stay honest about it.
+- Survey profile CRUD. Schedule / Distributions are not wired yet; those screens
+  stay honest about it.
 - Docker Compose: MariaDB + backend `:8030` + frontend `:8040`.
 - Documented local dev-login when Google OAuth client ids are unset.
