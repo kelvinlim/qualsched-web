@@ -1,5 +1,8 @@
 """MariaDB-compatible ORM schema for QualSched Web.
 
+Types are chosen for MariaDB 11 (JSON, DATETIME, TINYINT BOOLEAN, TEXT
+ciphertext). Tests may instantiate the same models on in-memory SQLite.
+
 HARD RULE: this database must NEVER store participant/contact PHI.
 No contacts table. No participant name / phone / email / time-slot / timezone /
 LogData columns. Those live in Qualtrics; later routes will proxy them and
@@ -13,7 +16,7 @@ Allowed tables:
 
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -104,7 +107,10 @@ class SurveyProfile(Base):
     default_time_zone: Mapped[str] = mapped_column(String(64), nullable=False, default="America/Chicago")
 
     # Leftover 0.1.4 clone ids (Qualtrics survey ids), not people.
-    survey_copies: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    # JSON (MariaDB) / JSON affinity (SQLite tests). server_default keeps NOT NULL inserts safe.
+    survey_copies: Mapped[list] = mapped_column(
+        JSON, nullable=False, default=list, server_default=text("'[]'")
+    )
     copies_source_survey_id: Mapped[str] = mapped_column(String(64), nullable=False, default="")
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

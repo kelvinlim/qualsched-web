@@ -1,4 +1,9 @@
-"""SQLAlchemy 2.0 engine, session factory, and FastAPI session dependency."""
+"""SQLAlchemy 2.0 engine, session factory, and FastAPI session dependency.
+
+Schema changes go through Alembic (`alembic upgrade head` in entrypoint.sh),
+the same way wearable-hub does. Do not `Base.metadata.create_all()` against
+MariaDB. Tests may `create_all` on in-memory SQLite only.
+"""
 
 from collections.abc import Generator
 
@@ -13,8 +18,10 @@ class Base(DeclarativeBase):
 
 
 def _engine_kwargs(url: str) -> dict:
+    # pool_pre_ping avoids stale connections after MariaDB idle timeouts.
     kwargs: dict = {"pool_pre_ping": True, "future": True}
     if url.startswith("sqlite"):
+        # Tests / escape hatch only. Production and compose use MariaDB.
         kwargs["connect_args"] = {"check_same_thread": False}
     return kwargs
 

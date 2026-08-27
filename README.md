@@ -45,36 +45,40 @@ Schedule computes a plan and books Qualtrics distributions; the plan is not stor
 Distributions lists booked invitations from Qualtrics and can cancel unsent ones;
 removing a contact cancels theirs first.
 
-## How to run (Docker Compose)
+## How to run (Docker Compose, local MariaDB sidecar)
 
-Preferred. Starts MariaDB, the API on **8030**, and the UI on **8040** — ports chosen so
-they do not collide with wearable-hub (`8010`/`8020`) or `/qualtrics_dashboard` on `8000`.
+MariaDB is the intended database. Local compose starts a **sidecar** MariaDB
+named `db` (host port **3307**) so you can work offline. That sidecar is not
+used on lnpitask — production points at external MariaDB on `cnc3.med.umn.edu`,
+same as wearable-hub.
+
+Ports: API **8030**, UI **8040** — they do not collide with wearable-hub
+(`8010`/`8020`) or `/qualtrics_dashboard` on `8000`.
 
 ```bash
 python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 cp .env.sample .env
 # paste the key into FERNET_KEY=
 # set SUPERADMIN_EMAILS=you@umn.edu
+# compose overrides DATABASE_URL / DB_WAIT_* to the sidecar `db` (see docker-compose.yml)
 
 docker compose up --build
 ```
 
-Open http://localhost:8040. Sign in with the SUPERADMIN_EMAILS address (development
-sign-in, because Google client ids are empty). On Accounts: add an account, paste a
-Qualtrics API token, save. Reload — the token field stays empty and says it is stored.
+The backend entrypoint waits for `DB_WAIT_HOST:DB_WAIT_PORT`, runs
+`alembic upgrade head`, then uvicorn. Open http://localhost:8040. Sign in with
+the SUPERADMIN_EMAILS address (development sign-in, because Google client ids
+are empty). On Accounts: add an account, paste a Qualtrics API token, save.
+Reload — the token field stays empty and says it is stored.
 
-### SQLite first-run (no MariaDB)
+### Tests (in-memory SQLite)
 
-From `backend/`, with a generated `FERNET_KEY` in `.env`:
+From `backend/`: `pytest`. The fixture is in-memory SQLite + `create_all`.
+Alembic revision `0001` is what production/compose apply on **MariaDB 11**
+(see `backend/tests/test_alembic_mariadb.py`).
 
-```bash
-export DATABASE_URL=sqlite:///./qualsched.db
-alembic upgrade head
-uvicorn app.main:app --host 0.0.0.0 --port 8030
-```
-
-In another terminal: `cd frontend && npm install && npm run dev` (Vite on 8040, proxies
-`/api` `/auth` `/health` to 8030).
+SQLite is not the default first-run. An explicit `sqlite:///./qualsched.db` URL
+is an escape hatch only (entrypoint skips the network wait for `sqlite*`).
 
 ## Environment variables
 
@@ -83,7 +87,9 @@ See [`.env.sample`](.env.sample). Summary:
 | Variable | Purpose |
 | --- | --- |
 | `FERNET_KEY` | Encrypts Qualtrics tokens **and** the session cookie |
-| `DATABASE_URL` | `mysql+pymysql://...` (compose) or `sqlite:///./qualsched.db` |
+| `DATABASE_URL` | `mysql+pymysql://…` — compose sidecar `db`, or cnc3 in prod |
+| `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Schema `qualsched` (do not reuse `wearable_hub`) |
+| `DB_WAIT_HOST` / `DB_WAIT_PORT` | entrypoint waits here before `alembic upgrade head` |
 | `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google researcher login |
 | `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`) |
@@ -94,10 +100,17 @@ allowlist (`users` row or `SUPERADMIN_EMAILS`).
 
 ## Production note (lnpitask.umn.edu)
 
-Wearable-hub already occupies `/wearable` and host ports around 8000/8010/8020. A later
-deploy of this app should follow that Quadlet pattern under a **new** path prefix
-(suggest `/qualsched`) and these host ports (8030 backend, 8040 frontend). Do not
-put QualSched Web on `/wearable` or on port 8000 (`/qualtrics_dashboard`).
+Same host as wearable-hub, **different schema** (`qualsched`, not
+`wearable_hub`), ports **8030** / **8040**, path prefix **`/qualsched`**. Do not
+occupy `/wearable` or port 8000 (`/qualtrics_dashboard`).
+
+Production `.env` points `DATABASE_URL` at the **external** MariaDB
+`cnc3.med.umn.edu:3306/qualsched` (placeholder password in `.env.sample` —
+replace it; never commit a real one). There is no MariaDB container on
+lnpitask, same as wearable-hub compose. Provision the `qualsched` schema/user
+on cnc3 before first start.
+
+Quadlet / host nginx deploy is a later conversation.
 
 ## License
 

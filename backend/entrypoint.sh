@@ -1,10 +1,11 @@
 #!/bin/sh
 set -e
 
-# SQLite is file-backed (or :memory:) — no network wait.
+# Wait for MariaDB, run migrations, then serve (wearable-hub pattern).
+# SQLite is tests / explicit escape hatch only — no network wait for sqlite*.
 case "${DATABASE_URL:-}" in
   sqlite*)
-    echo "SQLite database; skipping wait."
+    echo "SQLite database (tests / escape hatch); skipping wait."
     ;;
   *)
     DB_HOST="${DB_WAIT_HOST:-db}"

@@ -1,9 +1,14 @@
-# FastAPI backend + Svelte frontend + MariaDB.
+# FastAPI backend + Svelte frontend + local-only MariaDB sidecar.
 # Host ports chosen to avoid wearable-hub (8010/8020) and /qualtrics_dashboard on :8000.
 # Access: frontend http://localhost:8040  backend http://localhost:8030
 #
-# Production on lnpitask.umn.edu would follow wearable-hub Quadlets under a NEW path
-# prefix (suggest /qualsched) — do not occupy /wearable.
+# The `db` service is for offline local Docker only. Production on lnpitask.umn.edu
+# uses an external MariaDB at cnc3.med.umn.edu (DATABASE_URL in .env) — no db
+# container, same as wearable-hub compose. Do not reuse the wearable_hub schema;
+# provision a new `qualsched` schema/user on cnc3.
+#
+# Production Quadlets / host nginx (path prefix /qualsched, ports 8030/8040) are
+# a later deploy conversation. Do not occupy /wearable.
 
 services:
   db:
@@ -29,6 +34,8 @@ services:
     env_file:
       - .env
     environment:
+      # Compose sidecar, not cnc3. On lnpitask these overrides are absent and
+      # .env points at mysql+pymysql://…@cnc3.med.umn.edu:3306/qualsched.
       DATABASE_URL: mysql+pymysql://${DB_USER:-qualsched}:${DB_PASSWORD:-qualsched}@db:3306/${DB_NAME:-qualsched}
       DB_WAIT_HOST: db
       DB_WAIT_PORT: 3306

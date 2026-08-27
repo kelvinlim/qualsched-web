@@ -1,4 +1,9 @@
-"""Test bootstrap: in-memory SQLite, Fernet key, no Google client (dev-login on)."""
+"""Test bootstrap: in-memory SQLite, Fernet key, no Google client (dev-login on).
+
+SQLite here is the CI/test fixture only. Production and local compose use
+MariaDB; Alembic revision 0001 is what entrypoint.sh applies on MariaDB 11.
+See tests/test_alembic_mariadb.py.
+"""
 
 import os
 
