@@ -4,6 +4,14 @@ All notable changes to QualSched Web are documented in this file.
 
 ## [Unreleased]
 
+### Added
+- lnpitask deploy files (Podman Quadlets + host nginx snippet + `scripts/deploy.sh`),
+  mirroring wearable-hub. Prefix `/qualsched`, host ports 8030/8040, backend +
+  frontend only. Host checklist in `deploy/README.md`.
+- Production frontend image builds with Vite `base: /qualsched/` so the browser
+  requests assets and `/api` `/auth` under that prefix. Local vite/compose stay
+  at `/`. Host nginx still strips `/qualsched/`.
+
 ### Changed
 - MariaDB is the intended production/dev database, matching wearable-hub:
   external host `cnc3.med.umn.edu`, new schema/user `qualsched` (not

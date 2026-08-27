@@ -34,7 +34,7 @@
     {#if error}<div class="banner error">{error}</div>{/if}
 
     {#if status.google}
-      <a class="primary button" href="/auth/login">Sign in with Google</a>
+      <a class="primary button" href={api.withBase("/auth/login")}>Sign in with Google</a>
       <p class="hint">
         Your Google account must be on the researcher allowlist (SUPERADMIN_EMAILS or an
         existing users row). Google tokens are not stored.

@@ -3,6 +3,10 @@
  *
  * The Qualtrics API token never reaches this file. Every call goes to `/api/...`;
  * the backend talks to `{dc}.qualtrics.com`.
+ *
+ * Paths are joined with Vite `base` (`import.meta.env.BASE_URL`): `/` for local
+ * vite, `/qualsched/` in the production image. Host nginx strips `/qualsched/`
+ * so the frontend container still sees `/api/…` / `/auth/…`.
  */
 
 import type {
@@ -26,6 +30,14 @@ import type {
   UpdateInfo,
 } from "./types";
 
+/** Join a root-relative path with Vite `base` (`/` locally, `/qualsched/` in prod). */
+export function withBase(path: string): string {
+  const base = import.meta.env.BASE_URL || "/";
+  const prefix = base.endsWith("/") ? base : `${base}/`;
+  const rel = path.startsWith("/") ? path.slice(1) : path;
+  return `${prefix}${rel}`;
+}
+
 export type UnlistenFn = () => void;
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -33,7 +45,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  const res = await fetch(path, { credentials: "include", ...init, headers });
+  const res = await fetch(withBase(path), { credentials: "include", ...init, headers });
   if (res.status === 204) return undefined as T;
 
   const text = await res.text();
@@ -257,7 +269,7 @@ export const exportProjectConfig = async (
   filename: string,
 ) => {
   const res = await fetch(
-    `/api/accounts/${accountId}/projects/${projectId}/export`,
+    withBase(`/api/accounts/${accountId}/projects/${projectId}/export`),
     { credentials: "include" },
   );
   if (!res.ok) {

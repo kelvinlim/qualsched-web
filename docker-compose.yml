@@ -7,8 +7,8 @@
 # container, same as wearable-hub compose. Do not reuse the wearable_hub schema;
 # provision a new `qualsched` schema/user on cnc3.
 #
-# Production Quadlets / host nginx (path prefix /qualsched, ports 8030/8040) are
-# a later deploy conversation. Do not occupy /wearable.
+# Production on lnpitask uses Quadlets + host nginx (see deploy/), not this file.
+# Path prefix /qualsched, ports 8030/8040. Do not occupy /wearable.
 
 services:
   db:
@@ -48,7 +48,11 @@ services:
   frontend:
     # Svelte SPA served by nginx, which reverse-proxies /api, /auth, /health to the backend
     # (same-origin, no CORS). Access at http://localhost:8040.
-    build: ./frontend
+    # Override the image default (VITE_BASE=/qualsched/) so local compose stays at `/`.
+    build:
+      context: ./frontend
+      args:
+        VITE_BASE: /
     ports:
       - "8040:80"
     depends_on:

@@ -5,6 +5,9 @@ All notable changes to QualSched Web are documented in this file.
 ## [Unreleased]
 
 ### Changed
+- Production Docker build sets Vite `base: /qualsched/` (Dockerfile `VITE_BASE`).
+  Fetches join `import.meta.env.BASE_URL` so prod calls `/qualsched/api/…` and
+  `/qualsched/auth/…`. Local `npm run dev` and compose keep `base: /`.
 - Contacts no longer shows the milestone-1 "not wired" banner. The page lists
   participants from the Qualtrics mailing list and can add, edit, and remove them.
 - Schedule no longer shows the milestone-1 "not wired" banner. Compute plan and
