@@ -110,7 +110,7 @@ def test_preview_maps_eligible_vs_skipped(ctx, monkeypatch):
     reasons = {s["contactId"]: s["reason"] for s in body["skippedContacts"]}
     assert "NumDays" in reasons["CID_skip"]
     assert "already scheduled (SurveysScheduled = 12)" == reasons["CID_done"]
-    assert "24 hours" in body["warnings"][0]
+    assert body["warnings"] == []
     assert SECRET not in r.text
     assert "token" not in r.text.lower()
     assert fake.calls[0][0] == "get_elements"

@@ -24,7 +24,6 @@ from app.scheduler import (
     build_contact_plan,
     decorate_message,
     fmt_qualtrics_time,
-    multi_administration_warning,
 )
 from app.schemas import ItemFailure, PlanItem, SchedulePreview, SendReport, Skipped
 from app.serialize import profile_to_project
@@ -104,7 +103,6 @@ def preview(
     items: list[PlanItem] = []
     skipped_contacts: list[Skipped] = []
     skipped_slots: list[Skipped] = []
-    max_slots_per_day = 0
 
     for contact in raw:
         name = contacts_svc.display_name(contact)
@@ -159,7 +157,6 @@ def preview(
                 )
             )
             continue
-        max_slots_per_day = max(max_slots_per_day, len(result.slots))
         items.extend(_to_plan_item(item) for item in built)
         skipped_slots.extend(
             Skipped(contactId=s.contact_id, contactName=s.contact_name, reason=s.reason)
@@ -167,12 +164,11 @@ def preview(
         )
 
     items.sort(key=lambda i: i.sendUtc)
-    warning = multi_administration_warning(max_slots_per_day)
     return SchedulePreview(
         items=items,
         skippedContacts=skipped_contacts,
         skippedSlots=skipped_slots,
-        warnings=[warning] if warning else [],
+        warnings=[],
     )
 
 

@@ -213,19 +213,6 @@ def build_contact_plan(
     return items, skipped
 
 
-def multi_administration_warning(max_slots_per_day: int) -> str | None:
-    """What to tell the user when a plan asks for more than one invitation a day."""
-    if max_slots_per_day <= 1:
-        return None
-    return (
-        f"Some participants are scheduled for {max_slots_per_day} invitations a day. "
-        "Qualtrics drops a second SMS with the same wording to the same number within "
-        "24 hours. Each SMS now carries a unique tag before the survey link so the "
-        "copies differ — send a test participant first and confirm every slot arrives "
-        "before enrolling the rest of the list."
-    )
-
-
 def decorate_message(body: str, method: str, rng: Random) -> str:
     """Attach a unique tag so Qualtrics does not drop same-body SMS (Duplicates=1).
 

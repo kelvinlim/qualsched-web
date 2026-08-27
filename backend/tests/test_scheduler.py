@@ -12,7 +12,6 @@ from app.scheduler import (
     decorate_message,
     decorate_sms,
     fmt_qualtrics_time,
-    multi_administration_warning,
     resolve_slot,
 )
 
@@ -150,15 +149,6 @@ def test_qualtrics_send_date_is_utc_z():
     now = datetime(2026, 6, 1, tzinfo=timezone.utc)
     items, _ = build_contact_plan(plan_inputs([Slot("fixed", 800)], "2026-07-15", 1), now, rng())
     assert fmt_qualtrics_time(items[0].send_utc) == "2026-07-15T13:00:00Z"
-
-
-def test_the_one_a_day_warning_fires_only_for_multi_slot_plans():
-    assert multi_administration_warning(0) is None
-    assert multi_administration_warning(1) is None
-    warning = multi_administration_warning(4)
-    assert warning is not None
-    assert "4" in warning
-    assert "24 hours" in warning
 
 
 def test_sms_inserts_tag_before_piped_survey_link():
