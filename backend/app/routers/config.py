@@ -95,17 +95,7 @@ def forget_copies(
     return svc.forget_survey_copies(db, user, account_id, project_id)
 
 
-# --- Schedule / Distributions stay unwired (milestone 2) ----------
-
-
-@router.post("/accounts/{account_id}/projects/{project_id}/schedule/preview")
-def preview_schedule(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Schedule preview")
-
-
-@router.post("/accounts/{account_id}/projects/{project_id}/schedule/execute")
-def execute_schedule(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Schedule send")
+# --- Distributions list/cancel stay unwired (Schedule create is live) ----------
 
 
 @router.get("/accounts/{account_id}/projects/{project_id}/distributions")

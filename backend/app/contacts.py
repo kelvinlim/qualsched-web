@@ -173,6 +173,37 @@ def find_in_list(contacts: list[dict[str, Any]], contact_id: str) -> dict[str, A
     raise app_error(404, "NotFound", f"contact {contact_id} is not in this list")
 
 
+def resolve_contact_lookup_id(
+    client: QualtricsClient,
+    directory_id: str,
+    mailing_list_id: str,
+    contact: dict[str, Any],
+) -> str:
+    """The `CGC_…` id Qualtrics wants as a distribution recipient.
+
+    The mailing-list response usually carries `contactLookupId` already; falling
+    back to a directory-level GET only when it doesn't.
+    """
+    existing = contact.get("contactLookupId")
+    if isinstance(existing, str) and existing.strip():
+        return existing
+    contact_id = contact_id_of(contact)
+    if not contact_id:
+        raise app_error(400, "Invalid", "contact has no contactId")
+    body = client.get(f"directories/{directory_id}/contacts/{contact_id}")
+    result = body.get("result") if isinstance(body, dict) else None
+    membership = result.get("mailingListMembership") if isinstance(result, dict) else None
+    entry = membership.get(mailing_list_id) if isinstance(membership, dict) else None
+    lookup = entry.get("contactLookupId") if isinstance(entry, dict) else None
+    if isinstance(lookup, str) and lookup:
+        return lookup
+    raise app_error(
+        404,
+        "NotFound",
+        f"contact {contact_id} has no membership in mailing list {mailing_list_id}",
+    )
+
+
 def create_contact(
     client: QualtricsClient,
     directory_id: str,

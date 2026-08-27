@@ -75,10 +75,6 @@
   invitation is booked with Qualtrics for a specific moment — nothing needs to stay
   running afterwards.
 </p>
-<div class="banner warn">
-  Not wired yet (milestone 1). Preview and send will talk to Qualtrics only; participant
-  schedules will not be copied into this app's database.
-</div>
 
 {#if error}<div class="banner error">{error}</div>{/if}
 

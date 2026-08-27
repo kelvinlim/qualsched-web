@@ -25,6 +25,8 @@ FORBIDDEN = {
 def test_no_contacts_table():
     assert "contacts" not in Base.metadata.tables
     assert "participants" not in Base.metadata.tables
+    assert "schedules" not in Base.metadata.tables
+    assert "invitations" not in Base.metadata.tables
 
 
 def test_only_allowed_tables():
