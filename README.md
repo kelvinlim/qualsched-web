@@ -34,7 +34,7 @@ frontend calls `/api/...`; the backend uses httpx against `{dc}.qualtrics.com`.
 | No researcher login | Google OAuth allowlist (wearable-hub pattern) |
 | `invoke` / `listen` from the webview | HTTP (SSE later for schedule progress) |
 | Native file dialogs | `<input type="file">` and downloads |
-| Ships as a laptop app | Compose locally; Quadlets on lnpitask later |
+| Ships as a laptop app | Compose locally; Quadlets on lnpitask (`/qualsched`) |
 
 The sidebar and screens are the same: Accounts, Survey profile, Contacts, Schedule,
 Distributions, Import, Export, Guide.
@@ -92,25 +92,43 @@ See [`.env.sample`](.env.sample). Summary:
 | `DB_WAIT_HOST` / `DB_WAIT_PORT` | entrypoint waits here before `alembic upgrade head` |
 | `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google researcher login |
-| `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`) |
-| `ENVIRONMENT` | `dev` allows the documented bypass when Google ids are unset; never in prod |
+| `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`; prod: `https://lnpitask.umn.edu/qualsched/auth/callback`) |
+| `PUBLIC_PATH_PREFIX` | Host path prefix (`/qualsched` on lnpitask). Backend routes stay unprefixed; host nginx strips it |
+| `ENVIRONMENT` | `dev` allows the documented bypass when Google ids are unset; `prod` on lnpitask |
 
 Google tokens are **not** stored. The grant is only used to prove identity against the
 allowlist (`users` row or `SUPERADMIN_EMAILS`).
 
-## Production note (lnpitask.umn.edu)
+## Production (lnpitask.umn.edu)
 
-Same host as wearable-hub, **different schema** (`qualsched`, not
-`wearable_hub`), ports **8030** / **8040**, path prefix **`/qualsched`**. Do not
-occupy `/wearable` or port 8000 (`/qualtrics_dashboard`).
+Same host as wearable-hub: Podman **Quadlets** + host nginx location blocks —
+not compose. **Different** schema (`qualsched`, not `wearable_hub`), ports
+**8030** / **8040**, path prefix **`/qualsched`** only. Do not occupy
+`/wearable`, `/enroll`, `/webhooks`, `/qualtrics_dashboard`, or port 8000.
 
-Production `.env` points `DATABASE_URL` at the **external** MariaDB
-`cnc3.med.umn.edu:3306/qualsched` (placeholder password in `.env.sample` —
-replace it; never commit a real one). There is no MariaDB container on
-lnpitask, same as wearable-hub compose. Provision the `qualsched` schema/user
-on cnc3 before first start.
+Public URL: **https://lnpitask.umn.edu/qualsched/**
 
-Quadlet / host nginx deploy is a later conversation.
+Host checklist (do this on lnpitask; full detail in [deploy/README.md](deploy/README.md)):
+
+1. Checkout at `/home/kolim/Projects/qualsched-web` (or edit the Quadlet `EnvironmentFile` path).
+2. `cp .env.sample .env` and set `FERNET_KEY`, `SUPERADMIN_EMAILS`,
+   `DATABASE_URL` → cnc3 `qualsched`, `DB_WAIT_HOST=cnc3.med.umn.edu`,
+   `PUBLIC_PATH_PREFIX=/qualsched`,
+   `RESEARCHER_OAUTH_REDIRECT_URI=https://lnpitask.umn.edu/qualsched/auth/callback`,
+   `ENVIRONMENT=prod`. Never commit `.env`.
+3. Provision schema/user `qualsched` on cnc3 (Kelvin). No MariaDB container on lnpitask.
+4. Add the Google redirect URI above to the Cloud Console OAuth client.
+5. Copy [deploy/quadlet/](deploy/quadlet/) to `/etc/containers/systemd/`
+   (`qualsched.network`, backend, frontend — **no scheduler**).
+6. Merge [deploy/nginx/qualsched.conf](deploy/nginx/qualsched.conf) into the
+   existing TLS `server { }` (do not add a second listen/ssl block).
+   `sudo nginx -t && sudo nginx -s reload`.
+7. `scripts/deploy.sh` (rebuilds images, restarts units, curls
+   `localhost:8030/health` and `localhost:8040/`).
+
+Quadlet sources: [deploy/quadlet/](deploy/quadlet/). Logs:
+`sudo journalctl -u qualsched-backend.service -f`.
+`docker-compose.yml` is local development only.
 
 ## License
 
