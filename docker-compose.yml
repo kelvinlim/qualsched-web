@@ -48,7 +48,11 @@ services:
   frontend:
     # Svelte SPA served by nginx, which reverse-proxies /api, /auth, /health to the backend
     # (same-origin, no CORS). Access at http://localhost:8040.
-    build: ./frontend
+    # Override the image default (VITE_BASE=/qualsched/) so local compose stays at `/`.
+    build:
+      context: ./frontend
+      args:
+        VITE_BASE: /
     ports:
       - "8040:80"
     depends_on:

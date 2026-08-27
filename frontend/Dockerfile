@@ -2,6 +2,10 @@
 # backend API so the SPA stays same-origin — no CORS).
 FROM node:20-alpine AS build
 WORKDIR /app
+# Production default: asset + fetch URLs live under /qualsched/. Host nginx strips
+# that prefix; this container still serves at /. Local compose overrides VITE_BASE=/.
+ARG VITE_BASE=/qualsched/
+ENV VITE_BASE=$VITE_BASE
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .

@@ -138,12 +138,14 @@ Then open https://lnpitask.umn.edu/qualsched/
 `docker-compose.yml` is local-only (sidecar MariaDB `db` on host 3307). It is not
 used on lnpitask. Production reads `.env` (cnc3) via the Quadlet `EnvironmentFile`.
 
-## SPA prefix (follow-up, not this PR)
+## SPA prefix
 
-Host nginx strips `/qualsched/` so the frontend container sees `/` — that matches
-today's Vite `base: /` and `scripts/deploy.sh` curling `http://localhost:8040/`.
-wearable-hub's SPA is built with `base: /wearable/` so the *browser* keeps
-assets and API calls under the prefix. If `https://lnpitask.umn.edu/qualsched/`
-loads HTML but `/assets/…` or `/api/…` 404 at the site root, set Vite
-`base: '/qualsched/'` and prefix frontend `fetch` paths the same way. Do not
-change the host nginx strip.
+The production frontend image is built with Vite `base: /qualsched/`
+(`VITE_BASE` ARG in `frontend/Dockerfile`; default `/qualsched/`). Browser
+requests stay under the prefix (`/qualsched/assets/…`, `/qualsched/api/…`,
+`/qualsched/auth/…`). Host nginx still **strips** `/qualsched/` so the
+container sees `/`. Fetches join `import.meta.env.BASE_URL`.
+
+Local `vite` / `npm run dev` and local compose leave `base` at `/` so
+`http://localhost:8040/` is unchanged. The Vite proxy stays `/api` `/auth`
+`/health` on `/`. There is no History router — screens are in-memory.
