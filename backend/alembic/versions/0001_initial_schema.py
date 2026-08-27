@@ -1,5 +1,10 @@
 """Initial schema: researchers, Qualtrics accounts (encrypted token), survey profiles.
 
+MariaDB 11 types (same dialect as wearable-hub): BOOLEAN → TINYINT(1),
+DateTime → DATETIME, JSON → JSON, token_ciphertext → TEXT.
+entrypoint.sh applies this revision (`alembic upgrade head`) against MariaDB.
+Tests may still create_all on in-memory SQLite.
+
 No contacts table. No participant PII columns.
 
 Revision ID: 0001
@@ -61,21 +66,21 @@ def upgrade() -> None:
         sa.Column("message_id_email", sa.String(64), nullable=False, server_default=""),
         sa.Column("mailing_list_id", sa.String(64), nullable=False, server_default=""),
         sa.Column("timezone", sa.String(64), nullable=False, server_default="America/Chicago"),
-        sa.Column("minutes_expire", sa.Integer, nullable=False, server_default="60"),
+        sa.Column("minutes_expire", sa.Integer, nullable=False, server_default=sa.text("60")),
         sa.Column("from_email", sa.String(320), nullable=False, server_default="noreply@qualtrics.com"),
         sa.Column("from_name", sa.String(255), nullable=False, server_default="Qualtrics"),
         sa.Column("reply_to_email", sa.String(320), nullable=False, server_default="noreply@qualtrics.com"),
         sa.Column("subject", sa.String(255), nullable=False, server_default="Survey"),
         sa.Column("default_start_date", sa.String(32), nullable=False, server_default=""),
-        sa.Column("default_surveys_scheduled", sa.Integer, nullable=False, server_default="0"),
+        sa.Column("default_surveys_scheduled", sa.Integer, nullable=False, server_default=sa.text("0")),
         sa.Column("default_time_slots", sa.String(255), nullable=False, server_default="800,1200,1600,2000"),
         sa.Column("default_contact_method", sa.String(16), nullable=False, server_default="sms"),
-        sa.Column("default_delete_unsent", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("default_num_days", sa.Integer, nullable=False, server_default="0"),
-        sa.Column("default_expire_minutes", sa.Integer, nullable=False, server_default="60"),
+        sa.Column("default_delete_unsent", sa.Integer, nullable=False, server_default=sa.text("0")),
+        sa.Column("default_num_days", sa.Integer, nullable=False, server_default=sa.text("0")),
+        sa.Column("default_expire_minutes", sa.Integer, nullable=False, server_default=sa.text("60")),
         sa.Column("default_log_data", sa.Text, nullable=False, server_default="[]"),
         sa.Column("default_time_zone", sa.String(64), nullable=False, server_default="America/Chicago"),
-        sa.Column("survey_copies", sa.JSON, nullable=False),
+        sa.Column("survey_copies", sa.JSON, nullable=False, server_default=sa.text("'[]'")),
         sa.Column("copies_source_survey_id", sa.String(64), nullable=False, server_default=""),
         sa.Column("created_at", sa.DateTime, server_default=sa.func.now()),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now()),

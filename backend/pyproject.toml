@@ -34,6 +34,8 @@ target-version = "py312"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# So `from tests.test_accounts import …` works when pytest is run from backend/.
+pythonpath = ["."]
 
 [build-system]
 requires = ["setuptools>=68"]

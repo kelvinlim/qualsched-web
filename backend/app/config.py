@@ -20,8 +20,11 @@ class Settings(BaseSettings):
     public_path_prefix: str = ""
 
     # --- Database ---
-    # MariaDB in compose; SQLite is supported for first-run without Docker.
-    database_url: str = "mysql+pymysql://qualsched:qualsched@localhost:3306/qualsched"
+    # MariaDB is the intended database. Override per environment via .env.
+    # Production / lnpitask: mysql+pymysql://qualsched:<password>@cnc3.med.umn.edu:3306/qualsched
+    # Local compose: the backend service overrides this to the sidecar `db`.
+    # SQLite is tests-only (and an explicit escape hatch), not the default.
+    database_url: str = "mysql+pymysql://qualsched:changeme@localhost:3306/qualsched"
 
     # --- Token encryption at rest (Fernet) ---
     # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"

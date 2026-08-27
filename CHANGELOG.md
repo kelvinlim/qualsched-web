@@ -4,6 +4,13 @@ All notable changes to QualSched Web are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- MariaDB is the intended production/dev database, matching wearable-hub:
+  external host `cnc3.med.umn.edu`, new schema/user `qualsched` (not
+  `wearable_hub`). Local compose still starts its own MariaDB sidecar (`db`).
+  SQLite is tests-only (plus an explicit escape hatch), not the default first-run.
+  Alembic owns the schema; `create_all` is not used against MariaDB.
+
 ### Added
 - Contacts screen talks to the Qualtrics mailing list (list, add, edit, remove, fill
   missing embedded defaults). Participant PHI is proxied live and never stored.

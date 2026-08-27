@@ -1,5 +1,8 @@
 """Alembic environment. Pulls the DB URL from app settings and target metadata
 from the ORM Base so autogenerate sees the full schema.
+
+Production and compose apply revisions against MariaDB. `render_as_batch` is
+only for the SQLite test / escape-hatch URL.
 """
 
 from logging.config import fileConfig
