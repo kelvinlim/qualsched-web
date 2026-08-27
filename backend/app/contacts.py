@@ -373,12 +373,24 @@ def delete_view(
     raw = list_raw(client, account.default_directory, profile.mailing_list_id)
     contact = find_in_list(raw, contact_id)
     name = display_name(contact)
-    # Cancelling unsent invitations is a Distributions concern and is not wired yet.
-    # Desktop cancels first; we still remove the mailing-list membership and report 0.
+    # Late import: distributions talks to this module for mailing-list lookups.
+    from app.distributions import cancel_pending_for_contact, require_distribution_ids
+
+    require_distribution_ids(account, profile)
+    report = cancel_pending_for_contact(client, account, profile, contact)
+    if report.failed:
+        raise app_error(
+            502,
+            "Api",
+            f"{name} still has {len(report.failed)} invitation(s) that could not be "
+            f"cancelled ({report.failed[0].error}). They were left in the mailing list "
+            "so you can retry — removing them now would leave those invitations booked "
+            "with no way to trace them.",
+        )
     remove_from_mailing_list(
         client, account.default_directory, profile.mailing_list_id, contact_id
     )
-    return RemovedContact(contactName=name, cancelled=0)
+    return RemovedContact(contactName=name, cancelled=report.deleted)
 
 
 def apply_defaults(

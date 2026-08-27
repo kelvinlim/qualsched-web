@@ -51,7 +51,19 @@ class FakeQualtrics:
         cid = path.rsplit("/", 1)[-1]
         if cid not in self.contacts:
             raise QualtricsError(404, "NotFound", f"contact {cid} missing")
-        return {"result": self.contacts[cid]}
+        raw = self.contacts[cid]
+        # Directory-level GET (used to resolve CGC_… when the list row has none).
+        if path.startswith("directories/") and "/mailinglists/" not in path:
+            lookup = raw.get("contactLookupId") or f"CGC_{cid}"
+            return {
+                "result": {
+                    **raw,
+                    "mailingListMembership": {
+                        "CG_list": {"contactLookupId": lookup},
+                    },
+                }
+            }
+        return {"result": raw}
 
     def post(self, path: str, body: dict):
         self.calls.append(("post", path, body))
