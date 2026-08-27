@@ -13,12 +13,12 @@ All notable changes to QualSched Web are documented in this file.
   timezone and book one Qualtrics distribution per participant × day × slot. The plan
   is not stored. Missing token, data center, directory, mailing list, survey id, or
   message id returns HTTP 400 rather than an empty plan.
+- Distributions list and cancel: live Qualtrics invitations for the profile survey
+  (and leftover 0.1.4 clones), filtered by SMS or email. Unsent rows can be cancelled.
+  Removing a contact cancels their unsent invitations first and reports the count.
 
 ### Notes
-- Deleting a contact still removes them from the Qualtrics mailing list. Cancelling
-  their unsent invitations is not wired yet (Distributions list/delete stay 501), so
-  the response reports `cancelled=0`.
-- Schedule progress SSE is still a no-op. Distributions list/cancel is next.
+- Schedule progress SSE and delete-progress SSE are still no-ops.
 
 ## [0.0.1] - 2026-08-27
 

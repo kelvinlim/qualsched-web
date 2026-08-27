@@ -110,10 +110,6 @@
   Invitations already booked with Qualtrics for this profile. Anything still in the future
   can be cancelled.
 </p>
-<div class="banner warn">
-  Not wired yet (milestone 1). Distributions will be listed from Qualtrics and never stored
-  here.
-</div>
 
 {#if error}<div class="banner error">{error}</div>{/if}
 {#if notice}<div class="banner ok">{notice}</div>{/if}

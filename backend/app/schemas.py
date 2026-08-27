@@ -202,3 +202,37 @@ class SendReport(BaseModel):
     scheduled: int
     failed: list[ItemFailure] = Field(default_factory=list)
     bookkeepingFailures: list[ItemFailure] = Field(default_factory=list)
+
+
+class DistributionRow(BaseModel):
+    id: str
+    contactLookupId: str = ""
+    contactName: str = ""
+    contactPhone: str = ""
+    contactEmail: str = ""
+    sendDate: str = ""
+    sendLocal: str = ""
+    method: Literal["sms", "email"]
+    unsent: bool
+    surveyId: str
+    surveyLabel: str
+
+
+class DeleteTarget(BaseModel):
+    id: str
+    surveyId: str
+
+
+class DeleteDistributionsIn(BaseModel):
+    method: Literal["sms", "email"]
+    targets: list[DeleteTarget] = Field(default_factory=list)
+
+
+class DeleteFailure(BaseModel):
+    id: str
+    error: str
+
+
+class DeleteReport(BaseModel):
+    deleted: int
+    failed: list[DeleteFailure] = Field(default_factory=list)

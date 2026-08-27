@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app import accounts as svc
 from app.db import get_db
-from app.errors import not_implemented
 from app.models import User
 from app.schemas import Account, AppConfig, Project, TokenIn
 from app.security import get_current_user
@@ -93,26 +92,3 @@ def forget_copies(
     db: Session = Depends(get_db),
 ):
     return svc.forget_survey_copies(db, user, account_id, project_id)
-
-
-# --- Distributions list/cancel stay unwired (Schedule create is live) ----------
-
-
-@router.get("/accounts/{account_id}/projects/{project_id}/distributions")
-def list_distributions(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Distributions")
-
-
-@router.delete("/accounts/{account_id}/projects/{project_id}/distributions")
-def delete_distributions(account_id: str, project_id: str, user: User = Depends(get_current_user)):
-    raise not_implemented("Distributions")
-
-
-@router.delete("/accounts/{account_id}/projects/{project_id}/distributions/unsent/{contact_id}")
-def delete_unsent(
-    account_id: str,
-    project_id: str,
-    contact_id: str,
-    user: User = Depends(get_current_user),
-):
-    raise not_implemented("Distributions")

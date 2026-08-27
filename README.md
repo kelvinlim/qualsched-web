@@ -42,7 +42,8 @@ Distributions, Import, Export, Guide.
 **Milestone 1** wires Accounts (save data center + token) and survey-profile CRUD.
 Contacts now proxies the Qualtrics mailing list (no local participant table).
 Schedule computes a plan and books Qualtrics distributions; the plan is not stored.
-Distributions list/cancel is not wired yet.
+Distributions lists booked invitations from Qualtrics and can cancel unsent ones;
+removing a contact cancels theirs first.
 
 ## How to run (Docker Compose)
 
