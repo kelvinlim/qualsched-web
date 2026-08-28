@@ -36,8 +36,8 @@
     {#if status.google}
       <a class="primary button" href={api.withBase("/auth/login")}>Sign in with Google</a>
       <p class="hint">
-        Your Google account must be on the researcher allowlist (SUPERADMIN_EMAILS or an
-        existing users row). Google tokens are not stored.
+        Your Google account must be an @umn.edu address, listed in SUPERADMIN_EMAILS,
+        or already in the users table. Gmail is not campus-wide. Google tokens are not stored.
       </p>
     {/if}
 

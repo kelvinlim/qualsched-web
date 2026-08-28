@@ -1,7 +1,7 @@
 # QualSched Web
 
 Web port of [QualSched](https://github.com/kelvinlim/qualsched) — a researcher UI for
-scheduling Qualtrics EMA invitations. **Version 0.0.1** (milestone 1 skeleton).
+scheduling Qualtrics EMA invitations. **Version 0.1.0**.
 
 Desktop QualSched stays in its own repo. This app is the hosted version: the same
 Svelte screens, a FastAPI backend, MariaDB.
@@ -91,15 +91,16 @@ See [`.env.sample`](.env.sample). Summary:
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Schema `qualsched` (do not reuse `wearable_hub`) |
 | `DB_WAIT_HOST` / `DB_WAIT_PORT` | entrypoint waits here before `alembic upgrade head` |
 | `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails (superusers on first login) |
+| `ALLOWED_EMAIL_DOMAINS` | Comma-separated domains auto-provisioned as regular researchers (`umn.edu` on lnpitask; do not add `gmail.com`) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google researcher login |
 | `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`; prod: `https://lnpitask.umn.edu/qualsched/auth/callback`) |
 | `PUBLIC_PATH_PREFIX` | Host path prefix (`/qualsched` on lnpitask). Backend routes stay unprefixed; host nginx strips it |
 | `ENVIRONMENT` | `dev` allows the documented bypass when Google ids are unset; `prod` on lnpitask |
 
 Google tokens are **not** stored. The grant is only used to prove identity against the
-allowlist: a `users` row, or an address in `SUPERADMIN_EMAILS`. There is no
-campus-wide `@umn.edu` switch; add each Google email (Gmail and `umn.edu` are
-different accounts). After changing `.env`, restart the backend.
+allowlist: a `users` row, `SUPERADMIN_EMAILS`, or `ALLOWED_EMAIL_DOMAINS` (campus
+`@umn.edu` on lnpitask). Gmail is not included in the domain list. After changing
+`.env`, restart the backend.
 
 ## Production (lnpitask.umn.edu)
 
@@ -116,7 +117,7 @@ Host checklist (do this on lnpitask; full detail in [deploy/README.md](deploy/RE
 1. Checkout at `/home/kolim/Projects/qualsched-web` (or edit the Quadlet `EnvironmentFile` path).
 2. `cp .env.sample .env` and set `FERNET_KEY`, `SUPERADMIN_EMAILS`,
    `DATABASE_URL` → cnc3 `qualsched`, `DB_WAIT_HOST=cnc3.med.umn.edu`,
-   `PUBLIC_PATH_PREFIX=/qualsched`,
+   `PUBLIC_PATH_PREFIX=/qualsched`, `ALLOWED_EMAIL_DOMAINS=umn.edu`,
    `RESEARCHER_OAUTH_REDIRECT_URI=https://lnpitask.umn.edu/qualsched/auth/callback`,
    `ENVIRONMENT=prod`. Never commit `.env`.
 3. Provision schema/user `qualsched` on cnc3 (Kelvin). No MariaDB container on lnpitask.

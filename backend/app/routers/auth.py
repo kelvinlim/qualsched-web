@@ -1,7 +1,7 @@
 """Researcher Google-login auth (wearable-hub pattern).
 
 Flow: GET /auth/login -> Google consent -> GET /auth/callback -> verify id_token ->
-allowlist check (a `users` row, or a bootstrap SUPERADMIN_EMAILS email) -> set a
+allowlist check (a `users` row, SUPERADMIN_EMAILS, or ALLOWED_EMAIL_DOMAINS) -> set a
 session cookie -> redirect to the console. The grant is only used to prove identity;
 Google tokens are never stored.
 
@@ -43,19 +43,40 @@ def _superadmin_emails() -> set[str]:
     return {e.strip().lower() for e in get_settings().superadmin_emails.split(",") if e.strip()}
 
 
+def _allowed_domains() -> set[str]:
+    return {
+        d.strip().lower().lstrip("@")
+        for d in get_settings().allowed_email_domains.split(",")
+        if d.strip()
+    }
+
+
+def _domain_allowed(email: str) -> bool:
+    """True if the address is on ALLOWED_EMAIL_DOMAINS (exact domain or subdomain)."""
+    if "@" not in email:
+        return False
+    domain = email.rsplit("@", 1)[1].lower()
+    for allowed in _allowed_domains():
+        if domain == allowed or domain.endswith("." + allowed):
+            return True
+    return False
+
+
 def _provision_user(db: Session, email: str, sub: str | None, name: str | None) -> User | None:
     """Return the User for a verified identity, or None if not allowlisted.
 
     Allowlist = an existing `users` row, OR an email in SUPERADMIN_EMAILS (bootstrap —
-    created as a superuser on first login). Superadmin emails are (re)promoted on every login.
+    created as a superuser on first login), OR an address whose domain is in
+    ALLOWED_EMAIL_DOMAINS (created as a regular researcher). Superadmin emails are
+    (re)promoted on every login.
     """
     email = email.lower()
     user = db.scalar(select(User).where(User.email == email))
     is_boot_super = email in _superadmin_emails()
     if user is None:
-        if not is_boot_super:
+        if not is_boot_super and not _domain_allowed(email):
             return None
-        user = User(email=email, google_sub=sub, name=name, is_superuser=True)
+        user = User(email=email, google_sub=sub, name=name, is_superuser=is_boot_super)
         db.add(user)
     else:
         if sub:
@@ -201,8 +222,8 @@ def dev_login(body: DevLoginIn, db: Session = Depends(get_db)):
         raise app_error(
             403,
             "Forbidden",
-            "This email is not on SUPERADMIN_EMAILS and has no users row. "
-            "Add it to SUPERADMIN_EMAILS in .env.",
+            "This email is not on SUPERADMIN_EMAILS, ALLOWED_EMAIL_DOMAINS, or the users table. "
+            "Add it to SUPERADMIN_EMAILS or ALLOWED_EMAIL_DOMAINS in .env.",
         )
     return _session_response(user)
 

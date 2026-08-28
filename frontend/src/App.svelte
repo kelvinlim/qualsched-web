@@ -15,7 +15,7 @@
   import ExportScreen from "./screens/ExportScreen.svelte";
   import GuideScreen from "./screens/GuideScreen.svelte";
 
-  const VERSION = "0.0.1";
+  const VERSION = "0.1.0";
 
   let loadError = $state("");
   let version = $state(VERSION);

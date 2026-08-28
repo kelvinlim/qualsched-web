@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # --- App ---
     app_name: str = "QualSched Web"
     # Keep in sync with backend/pyproject.toml + frontend/package.json.
-    app_version: str = "0.0.1"
+    app_version: str = "0.1.0"
     environment: str = "dev"  # dev | prod
 
     # Public URL path prefix the app would be served under on the host (e.g. "/qualsched"
@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     researcher_google_scopes: str = "openid email profile"
     # Bootstrap superadmins: these emails are auto-provisioned as superusers on first login.
     superadmin_emails: str = ""  # comma-separated
+    # Comma-separated email domains auto-provisioned as non-superuser researchers on
+    # first Google login (e.g. "umn.edu"). Matches the domain and its subdomains.
+    # Do not add gmail.com — that would allow any Google account on the internet.
+    # Empty = no domain-wide allowlist (SUPERADMIN_EMAILS + existing users rows only).
+    allowed_email_domains: str = ""
     # Signed+encrypted session cookie (Fernet, reuses FERNET_KEY) lifetime.
     session_ttl_seconds: int = 60 * 60 * 12  # 12h
 

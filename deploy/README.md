@@ -46,6 +46,7 @@ Fill in (never commit this file):
 | `ENVIRONMENT` | `prod` (disables the local dev-login bypass) |
 | `FERNET_KEY` | `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` |
 | `SUPERADMIN_EMAILS` | bootstrap researcher emails, comma-separated |
+| `ALLOWED_EMAIL_DOMAINS` | `umn.edu` (auto-provision regular researchers; not `gmail.com`) |
 | `DATABASE_URL` | `mysql+pymysql://qualsched:<password>@cnc3.med.umn.edu:3306/qualsched` |
 | `DB_NAME` / `DB_USER` | `qualsched` (not `wearable_hub`) |
 | `DB_PASSWORD` | the cnc3 password Kelvin provisions — placeholder in `.env.sample` only |
@@ -97,26 +98,25 @@ Add it under **Authorized redirect URIs**, not JavaScript origins, then Save.
 
 ## 4b. Researcher allowlist
 
-Google proving identity is not enough. The app then checks:
+Google proving identity is not enough. The app then checks, in order:
 
-1. **`SUPERADMIN_EMAILS`** in `.env` — comma-separated Google emails. First login
-   creates a **superuser**. Restart `qualsched-backend` after editing `.env`
-   (`sudo systemctl restart qualsched-backend.service`).
-2. **An existing `users` row** — any matching email can sign in. Insert in
-   phpMyAdmin (regular researcher, not superuser):
+1. **An existing `users` row** — that Google email can sign in (regular or
+   superuser as stored). Covers Gmail colleagues you insert by hand.
+2. **`SUPERADMIN_EMAILS`** in `.env` — comma-separated Google emails. First login
+   creates a **superuser**. Restart `qualsched-backend` after editing `.env`.
+3. **`ALLOWED_EMAIL_DOMAINS`** — comma-separated domains (lnpitask: `umn.edu`).
+   First login creates a **regular** researcher. Matches `@umn.edu` and
+   subdomains (`@med.umn.edu`). Do **not** add `gmail.com`.
 
-```sql
-INSERT INTO qualsched.users (email, is_superuser) VALUES ('colleague@umn.edu', 0);
-```
+Deleting a `users` row does **not** ban a `@umn.edu` account while the domain
+is still allowed; they are recreated on next login. There is no denylist yet.
 
-There is no “anyone @umn.edu” switch yet. Add each Google address via (1) or (2).
 `Forbidden: This Google account is not authorized` means the address is on
-neither list. The Gmail used for wearable-hub is not the same as a `umn.edu`
-Workspace login — add both if people use both.
+none of those lists. Gmail is not implied by `umn.edu`.
 
 If the OAuth consent screen is **External / Testing**, Google also requires that
 address on the Cloud Console test-user list (cap 100). Workspace **Internal**
-apps can skip that list for org accounts.
+or a published External app is what actually opens campus logins.
 
 ## 5. Install Quadlets
 

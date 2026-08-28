@@ -4,7 +4,11 @@ All notable changes to QualSched Web are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-28
+
 ### Changed
+- Login hint: campus `@umn.edu` (ALLOWED_EMAIL_DOMAINS) plus explicit SUPERADMIN /
+  users-row allowlist. Gmail is not campus-wide.
 - Production Docker build sets Vite `base: /qualsched/` (Dockerfile `VITE_BASE`).
   Fetches join `import.meta.env.BASE_URL` so prod calls `/qualsched/api/…` and
   `/qualsched/auth/…`. Local `npm run dev` and compose keep `base: /`.
