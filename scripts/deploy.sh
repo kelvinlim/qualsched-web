@@ -49,13 +49,13 @@ esac
 
 echo "==> Waiting for backend (migrations run on startup)"
 for _ in $(seq 1 30); do
-  code="$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' http://localhost:8030/health || true)"
+  code="$(curl -s --noproxy '*' -o /dev/null -w '%{http_code}' http://localhost:8050/health || true)"
   [ "$code" = "200" ] && break
   sleep 2
 done
-curl -s --noproxy '*' http://localhost:8030/health \
+curl -s --noproxy '*' http://localhost:8050/health \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('backend /health: version', d.get('version'), '| db', d.get('db'))" \
   2>/dev/null || echo "backend /health: not OK"
 # Frontend container sees "/", not "/qualsched/" (host nginx strips the prefix).
-curl -s --noproxy '*' -o /dev/null -w 'frontend: HTTP %{http_code}\n' http://localhost:8040/
+curl -s --noproxy '*' -o /dev/null -w 'frontend: HTTP %{http_code}\n' http://localhost:8060/
 echo "==> Done"

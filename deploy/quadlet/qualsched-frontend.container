@@ -6,7 +6,7 @@
 # Install: copy to /etc/containers/systemd/, then `sudo systemctl daemon-reload && sudo systemctl start qualsched-frontend.service`
 
 [Unit]
-Description=QualSched Web frontend (Vite/nginx on host :8040 -> container :80)
+Description=QualSched Web frontend (Vite/nginx on host 127.0.0.1:8060 -> container :80)
 Wants=network-online.target
 After=network-online.target
 Requires=qualsched-network.service
@@ -15,7 +15,8 @@ After=qualsched-network.service qualsched-backend.service
 [Container]
 ContainerName=qualsched-frontend
 Image=localhost/qualsched-frontend:latest
-PublishPort=8040:80
+# tictech already owns 127.0.0.1:8030/8040; wearable is 8010/8020.
+PublishPort=127.0.0.1:8060:80
 Network=qualsched.network
 
 [Service]

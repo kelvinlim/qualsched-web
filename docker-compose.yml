@@ -8,7 +8,7 @@
 # provision a new `qualsched` schema/user on cnc3.
 #
 # Production on lnpitask uses Quadlets + host nginx (see deploy/), not this file.
-# Path prefix /qualsched, ports 8030/8040. Do not occupy /wearable.
+# Path prefix /qualsched, host ports 8050/8060 (tictech already uses 8030/8040). Do not occupy /wearable.
 
 services:
   db:

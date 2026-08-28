@@ -90,21 +90,24 @@ See [`.env.sample`](.env.sample). Summary:
 | `DATABASE_URL` | `mysql+pymysql://…` — compose sidecar `db`, or cnc3 in prod |
 | `DB_NAME` / `DB_USER` / `DB_PASSWORD` | Schema `qualsched` (do not reuse `wearable_hub`) |
 | `DB_WAIT_HOST` / `DB_WAIT_PORT` | entrypoint waits here before `alembic upgrade head` |
-| `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails |
+| `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails (superusers on first login) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google researcher login |
 | `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`; prod: `https://lnpitask.umn.edu/qualsched/auth/callback`) |
 | `PUBLIC_PATH_PREFIX` | Host path prefix (`/qualsched` on lnpitask). Backend routes stay unprefixed; host nginx strips it |
 | `ENVIRONMENT` | `dev` allows the documented bypass when Google ids are unset; `prod` on lnpitask |
 
 Google tokens are **not** stored. The grant is only used to prove identity against the
-allowlist (`users` row or `SUPERADMIN_EMAILS`).
+allowlist: a `users` row, or an address in `SUPERADMIN_EMAILS`. There is no
+campus-wide `@umn.edu` switch; add each Google email (Gmail and `umn.edu` are
+different accounts). After changing `.env`, restart the backend.
 
 ## Production (lnpitask.umn.edu)
 
 Same host as wearable-hub: Podman **Quadlets** + host nginx location blocks —
-not compose. **Different** schema (`qualsched`, not `wearable_hub`), ports
-**8030** / **8040**, path prefix **`/qualsched`** only. Do not occupy
-`/wearable`, `/enroll`, `/webhooks`, `/qualtrics_dashboard`, or port 8000.
+not compose. **Different** schema (`qualsched`, not `wearable_hub`), host ports
+**8050** / **8060** (loopback; tictech already uses 8030/8040), path prefix
+**`/qualsched`** only. Do not occupy `/wearable`, `/enroll`, `/webhooks`,
+`/qualtrics_dashboard`, `/tictech`, or port 8000.
 
 Public URL: **https://lnpitask.umn.edu/qualsched/**
 
@@ -117,14 +120,15 @@ Host checklist (do this on lnpitask; full detail in [deploy/README.md](deploy/RE
    `RESEARCHER_OAUTH_REDIRECT_URI=https://lnpitask.umn.edu/qualsched/auth/callback`,
    `ENVIRONMENT=prod`. Never commit `.env`.
 3. Provision schema/user `qualsched` on cnc3 (Kelvin). No MariaDB container on lnpitask.
-4. Add the Google redirect URI above to the Cloud Console OAuth client.
+4. Add the Google redirect URI above to the OAuth 2.0 web client in GCP project
+   `fitbitdata-499001` (same client as wearable-hub).
 5. Copy [deploy/quadlet/](deploy/quadlet/) to `/etc/containers/systemd/`
    (`qualsched.network`, backend, frontend — **no scheduler**).
 6. Merge [deploy/nginx/qualsched.conf](deploy/nginx/qualsched.conf) into the
    existing TLS `server { }` (do not add a second listen/ssl block).
    `sudo nginx -t && sudo nginx -s reload`.
 7. `scripts/deploy.sh` (rebuilds images, restarts units, curls
-   `localhost:8030/health` and `localhost:8040/`).
+   `localhost:8050/health` and `localhost:8060/`).
 
 Quadlet sources: [deploy/quadlet/](deploy/quadlet/). Logs:
 `sudo journalctl -u qualsched-backend.service -f`.

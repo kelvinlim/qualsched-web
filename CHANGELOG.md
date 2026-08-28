@@ -6,8 +6,12 @@ All notable changes to QualSched Web are documented in this file.
 
 ### Added
 - lnpitask deploy files (Podman Quadlets + host nginx snippet + `scripts/deploy.sh`),
-  mirroring wearable-hub. Prefix `/qualsched`, host ports 8030/8040, backend +
-  frontend only. Host checklist in `deploy/README.md`.
+  mirroring wearable-hub. Prefix `/qualsched`, host ports 8050/8060 (tictech
+  already uses 8030/8040), backend + frontend only. Host checklist in
+  `deploy/README.md`. Researcher Google OAuth uses the OAuth 2.0 web client in
+  GCP project `fitbitdata-499001` (same client as wearable-hub). Researcher
+  allowlist is `SUPERADMIN_EMAILS` plus `users` rows (no `@umn.edu` domain
+  switch yet); see `deploy/README.md` §4b.
 - Production frontend image builds with Vite `base: /qualsched/` so the browser
   requests assets and `/api` `/auth` under that prefix. Local vite/compose stay
   at `/`. Host nginx still strips `/qualsched/`.
