@@ -4,6 +4,11 @@ All notable changes to QualSched Web are documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Public Privacy Policy and Terms of Service pages (`/privacy`, `/terms`) for
+  Google OAuth branding. Login screen links to both; they render without sign-in.
+- Desktop QualSched logo on the login screen, sidebar, and browser tab.
+
 ## [0.1.0] - 2026-08-28
 
 ### Changed

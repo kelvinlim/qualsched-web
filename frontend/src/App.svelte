@@ -3,7 +3,9 @@
   import { app, type ScreenName } from "./lib/state.svelte";
   import { errorMessage, type UpdateInfo } from "./lib/types";
 
+  import logo from "./assets/qualsched-icon.png";
   import ChangelogPanel from "./components/ChangelogPanel.svelte";
+  import LegalPage from "./components/LegalPage.svelte";
   import LoginScreen from "./components/LoginScreen.svelte";
 
   import AccountsScreen from "./screens/AccountsScreen.svelte";
@@ -16,6 +18,7 @@
   import GuideScreen from "./screens/GuideScreen.svelte";
 
   const VERSION = "0.1.0";
+  const legalKind = api.legalKindFromPath();
 
   let loadError = $state("");
   let version = $state(VERSION);
@@ -43,6 +46,7 @@
   }
 
   $effect(() => {
+    if (legalKind) return;
     void (async () => {
       try {
         authStatus = await api.authStatus();
@@ -127,7 +131,9 @@
   ];
 </script>
 
-{#if !authChecked}
+{#if legalKind}
+  <LegalPage kind={legalKind} />
+{:else if !authChecked}
   <div class="empty">Loading…</div>
 {:else if !me}
   {#if authStatus}
@@ -139,7 +145,8 @@
   <div class="layout">
     <nav class="sidebar">
       <div class="brand">
-        QualSched
+        <img class="logo" src={logo} alt="" width="28" height="28" />
+        <span class="name">QualSched</span>
         {#if version}<span class="version">v{version}</span>{/if}
       </div>
       {#each nav as item (item.screen)}

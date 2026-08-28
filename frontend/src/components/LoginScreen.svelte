@@ -1,4 +1,5 @@
 <script lang="ts">
+  import logo from "../assets/qualsched-icon.png";
   import * as api from "../lib/api";
   import { errorMessage } from "../lib/types";
 
@@ -28,8 +29,14 @@
 
 <div class="login">
   <div class="card">
-    <h1>QualSched</h1>
-    <p class="subtitle">Researcher sign-in. Participant records stay in Qualtrics.</p>
+    <div class="login-brand">
+      <img src={logo} alt="" width="48" height="48" />
+      <h1>QualSched</h1>
+    </div>
+    <p class="subtitle">
+      QualSched is a researcher tool for scheduling Qualtrics EMA invitations.
+      Participant records stay in Qualtrics.
+    </p>
 
     {#if error}<div class="banner error">{error}</div>{/if}
 
@@ -78,6 +85,12 @@
         ENVIRONMENT=dev and empty Google client ids.
       </div>
     {/if}
+
+    <nav class="legal-links" aria-label="Legal">
+      <a href={api.withBase("/privacy")}>Privacy</a>
+      <span aria-hidden="true">·</span>
+      <a href={api.withBase("/terms")}>Terms</a>
+    </nav>
   </div>
 </div>
 
@@ -93,6 +106,20 @@
     width: min(26rem, 100%);
     margin: 0;
   }
+  .login-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  .login-brand img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.55rem;
+  }
+  .login-brand h1 {
+    margin: 0;
+  }
   .button {
     display: inline-block;
     text-align: center;
@@ -104,5 +131,21 @@
     border: 1px solid var(--accent);
     color: #fff;
     font-weight: 600;
+  }
+  .legal-links {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-top: 1.25rem;
+    font-size: 0.85rem;
+  }
+  .legal-links a {
+    color: var(--muted);
+  }
+  .legal-links a:hover {
+    color: var(--accent);
+  }
+  .legal-links span {
+    color: var(--border);
   }
 </style>

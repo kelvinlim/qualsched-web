@@ -91,9 +91,20 @@ p {
   font-size: 1.05rem;
   padding: 0 0.5rem 0.75rem;
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  align-items: center;
   gap: 0.5rem;
+}
+
+.sidebar .brand .logo {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.35rem;
+  flex-shrink: 0;
+}
+
+.sidebar .brand .name {
+  flex: 1;
+  min-width: 0;
 }
 
 .sidebar .brand .version {

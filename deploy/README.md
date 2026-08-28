@@ -54,7 +54,7 @@ Fill in (never commit this file):
 | `DB_WAIT_PORT` | `3306` |
 | `PUBLIC_PATH_PREFIX` | `/qualsched` |
 | `RESEARCHER_OAUTH_REDIRECT_URI` | `https://lnpitask.umn.edu/qualsched/auth/callback` |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | OAuth 2.0 web client in GCP project **fitbitdata-499001** (same client as wearable-hub) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Dedicated **QualSched** OAuth 2.0 web client (External, **In production**). Do **not** reuse wearable-hub / `fitbitdata-499001`. |
 
 Optional: `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` in `.env` so
 `scripts/deploy.sh` can re-export them through `sudo -E podman build`.
@@ -81,20 +81,59 @@ FLUSH PRIVILEGES;
 Alembic runs from the backend entrypoint on first start (`alembic upgrade head`).
 There is no MariaDB container on lnpitask.
 
-## 4. Google redirect URI
+## 4. Google OAuth (dedicated QualSched project)
 
-Researcher login reuses the **OAuth 2.0 Web client** in GCP project
-**fitbitdata-499001** (same client as wearable-hub; Console → APIs & Services →
-Credentials). Add this authorized redirect URI (keep `/wearable/auth/callback`):
+Do **not** reuse wearable-hub’s GCP project `fitbitdata-499001` or its web client.
+That app is External / Testing (100 test users) and requests Google Health scopes.
+QualSched only needs **openid email profile**.
 
-```
-https://lnpitask.umn.edu/qualsched/auth/callback
-```
+Create a **new** Cloud project (name e.g. `qualsched-web`; prefer the umn.edu org).
+Record the project ID here once it exists: *(fill in after Console create)*.
 
-Must match `RESEARCHER_OAUTH_REDIRECT_URI` exactly. A missing URI is Google
-`Error 400: redirect_uri_mismatch`. Open the **Web application** whose Client ID
-matches the `client_id=` on the Google error page (starts with `569496656627-`).
-Add it under **Authorized redirect URIs**, not JavaScript origins, then Save.
+### Consent screen
+
+Deploy the public Privacy and Terms pages (this repo’s `/privacy` and `/terms`)
+**before** saving the Branding URLs. Google fetches them with no login; localhost
+is not accepted for production branding.
+
+Google Auth Platform → **Branding**:
+
+1. User type **External**. App name **QualSched**. Support + developer contact: a
+   monitored **umn.edu** mailbox (e.g. `kolim@umn.edu`).
+2. **Do not upload an app logo.** A logo forces brand verification unless the app
+   stays in Testing. QualSched only uses `openid email profile`, so you can publish
+   without one.
+3. Authorized domain **`umn.edu`**. Paste these URLs (must already be live on
+   lnpitask):
+
+   | Field | URL |
+   | --- | --- |
+   | Application home page | `https://lnpitask.umn.edu/qualsched/` |
+   | Privacy policy | `https://lnpitask.umn.edu/qualsched/privacy` |
+   | Terms of service | `https://lnpitask.umn.edu/qualsched/terms` |
+
+   Use `https://lnpitask.umn.edu/` as the home page only if Google requires a
+   host-only URL.
+4. Scopes: **openid**, **email**, **profile** only. No Health / Fitbit scopes.
+5. **Publish app** (Testing → **In production**). That removes the 100-user cap.
+   Users may see “Google hasn’t verified this app” until brand verification;
+   they can continue. Skip CASA unless you add sensitive scopes later.
+
+Publishing does **not** bypass the QualSched allowlist (§4b). It only lets Google
+issue tokens to more than 100 testers.
+
+### Web client
+
+Credentials → Create **OAuth client ID** → **Web application**:
+
+- Authorized JavaScript origins: `https://lnpitask.umn.edu`
+- Authorized redirect URIs (exact; no trailing slash on the callback):
+  - `https://lnpitask.umn.edu/qualsched/auth/callback`
+  - `http://localhost:8040/auth/callback` (local compose)
+
+Must match `RESEARCHER_OAUTH_REDIRECT_URI`. A missing prod URI is Google
+`Error 400: redirect_uri_mismatch`. Put the client id/secret only in the host
+`.env`, then `sudo systemctl restart qualsched-backend.service` (no image rebuild).
 
 ## 4b. Researcher allowlist
 
@@ -114,9 +153,10 @@ is still allowed; they are recreated on next login. There is no denylist yet.
 `Forbidden: This Google account is not authorized` means the address is on
 none of those lists. Gmail is not implied by `umn.edu`.
 
-If the OAuth consent screen is **External / Testing**, Google also requires that
-address on the Cloud Console test-user list (cap 100). Workspace **Internal**
-or a published External app is what actually opens campus logins.
+If the QualSched OAuth client is still **External / Testing**, Google’s 100
+test-user cap still applies even when `ALLOWED_EMAIL_DOMAINS=umn.edu`. Publish
+the QualSched consent screen to **In production** (§4). Wearable-hub’s
+`fitbitdata-499001` client is unrelated.
 
 ## 5. Install Quadlets
 

@@ -38,6 +38,22 @@ export function withBase(path: string): string {
   return `${prefix}${rel}`;
 }
 
+/** Public legal pages Google OAuth branding links to. Null for every other path. */
+export function legalKindFromPath(
+  pathname = typeof window !== "undefined" ? window.location.pathname : "/",
+): "privacy" | "terms" | null {
+  const base = import.meta.env.BASE_URL || "/";
+  const prefix = base.endsWith("/") ? base.slice(0, -1) : base;
+  let path = pathname;
+  if (prefix && (path === prefix || path.startsWith(`${prefix}/`))) {
+    path = path.slice(prefix.length) || "/";
+  }
+  const normalized = path.replace(/\/+$/, "") || "/";
+  if (normalized === "/privacy") return "privacy";
+  if (normalized === "/terms") return "terms";
+  return null;
+}
+
 export type UnlistenFn = () => void;
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {

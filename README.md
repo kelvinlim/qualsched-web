@@ -68,8 +68,10 @@ docker compose up --build
 The backend entrypoint waits for `DB_WAIT_HOST:DB_WAIT_PORT`, runs
 `alembic upgrade head`, then uvicorn. Open http://localhost:8040. Sign in with
 the SUPERADMIN_EMAILS address (development sign-in, because Google client ids
-are empty). On Accounts: add an account, paste a Qualtrics API token, save.
-Reload — the token field stays empty and says it is stored.
+are empty). Public Privacy / Terms (no login):
+http://localhost:8040/privacy and http://localhost:8040/terms. On Accounts: add
+an account, paste a Qualtrics API token, save. Reload — the token field stays
+empty and says it is stored.
 
 ### Tests (in-memory SQLite)
 
@@ -92,7 +94,7 @@ See [`.env.sample`](.env.sample). Summary:
 | `DB_WAIT_HOST` / `DB_WAIT_PORT` | entrypoint waits here before `alembic upgrade head` |
 | `SUPERADMIN_EMAILS` | Comma-separated bootstrap researcher emails (superusers on first login) |
 | `ALLOWED_EMAIL_DOMAINS` | Comma-separated domains auto-provisioned as regular researchers (`umn.edu` on lnpitask; do not add `gmail.com`) |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google researcher login |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Dedicated QualSched OAuth web client (not wearable-hub / `fitbitdata-499001`) |
 | `RESEARCHER_OAUTH_REDIRECT_URI` | Must match the Cloud Console redirect (local: `http://localhost:8040/auth/callback`; prod: `https://lnpitask.umn.edu/qualsched/auth/callback`) |
 | `PUBLIC_PATH_PREFIX` | Host path prefix (`/qualsched` on lnpitask). Backend routes stay unprefixed; host nginx strips it |
 | `ENVIRONMENT` | `dev` allows the documented bypass when Google ids are unset; `prod` on lnpitask |
@@ -112,6 +114,15 @@ not compose. **Different** schema (`qualsched`, not `wearable_hub`), host ports
 
 Public URL: **https://lnpitask.umn.edu/qualsched/**
 
+Google OAuth branding pages (no login; paste these in Cloud Console → Branding):
+
+- Home: https://lnpitask.umn.edu/qualsched/
+- Privacy: https://lnpitask.umn.edu/qualsched/privacy
+- Terms: https://lnpitask.umn.edu/qualsched/terms
+
+Do not upload a consent-screen logo (forces verification). Full Console steps:
+[deploy/README.md](deploy/README.md) §4.
+
 Host checklist (do this on lnpitask; full detail in [deploy/README.md](deploy/README.md)):
 
 1. Checkout at `/home/kolim/Projects/qualsched-web` (or edit the Quadlet `EnvironmentFile` path).
@@ -121,8 +132,10 @@ Host checklist (do this on lnpitask; full detail in [deploy/README.md](deploy/RE
    `RESEARCHER_OAUTH_REDIRECT_URI=https://lnpitask.umn.edu/qualsched/auth/callback`,
    `ENVIRONMENT=prod`. Never commit `.env`.
 3. Provision schema/user `qualsched` on cnc3 (Kelvin). No MariaDB container on lnpitask.
-4. Add the Google redirect URI above to the OAuth 2.0 web client in GCP project
-   `fitbitdata-499001` (same client as wearable-hub).
+4. Create a **dedicated** GCP OAuth project for QualSched (External, **In
+   production**, scopes openid/email/profile only). Do not reuse
+   `fitbitdata-499001`. Put the web client id/secret in `.env` (see
+   [deploy/README.md](deploy/README.md) §4).
 5. Copy [deploy/quadlet/](deploy/quadlet/) to `/etc/containers/systemd/`
    (`qualsched.network`, backend, frontend — **no scheduler**).
 6. Merge [deploy/nginx/qualsched.conf](deploy/nginx/qualsched.conf) into the
